@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BobinaTrack — Controle e Localização de Bobinas</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11l9-8 9 8M5 10v10h14V10"/></symbol>
+<symbol id="i-box" viewBox="0 0 24 24"><path d="M3 7l9-4 9 4v10l-9 4-9-4zM3 7l9 4 9-4M12 11v10"/></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+<symbol id="i-search" viewBox="0 0 24 24"><path d="M11 4a7 7 0 100 14 7 7 0 000-14zM21 21l-5-5"/></symbol>
+<symbol id="i-clock" viewBox="0 0 24 24"><path d="M12 3a9 9 0 100 18 9 9 0 000-18zM12 7v5l3 2"/></symbol>
+<symbol id="i-swap" viewBox="0 0 24 24"><path d="M7 4L3 8l4 4M3 8h14M17 20l4-4-4-4M21 16H7"/></symbol>
+<symbol id="i-gear" viewBox="0 0 24 24"><path d="M12 9a3 3 0 100 6 3 3 0 000-6zM12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></symbol>
+<symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></symbol>
+</svg>
+
+<aside id="side">
+  <div class="brand"><span class="logo"></span><b>BobinaTrack</b></div>
+  <nav>
+    <button data-v="dashboard"><svg class="i"><use href="#i-home"/></svg>Visão geral</button>
+    <button data-v="coils"><svg class="i"><use href="#i-box"/></svg>Bobinas</button>
+    <button data-a="new"><svg class="i"><use href="#i-plus"/></svg>Cadastro</button>
+    <button data-v="search"><svg class="i"><use href="#i-search"/></svg>Pesquisa</button>
+    <button data-v="history"><svg class="i"><use href="#i-clock"/></svg>Histórico</button>
+    <button data-v="io"><svg class="i"><use href="#i-swap"/></svg>Importar e exportar</button>
+    <button data-v="settings"><svg class="i"><use href="#i-gear"/></svg>Configurações</button>
+  </nav>
+  <p class="note">Dados salvos apenas neste navegador e dispositivo.</p>
+</aside>
+<div id="scrim"></div>
+
+<main>
+  <header class="top">
+    <button id="menu" class="ghost" aria-label="Abrir menu"><svg class="i"><use href="#i-menu"/></svg></button>
+    <div><h1 id="title">Visão geral</h1><span id="date"></span></div>
+    <button class="btn pri" data-a="new"><svg class="i"><use href="#i-plus"/></svg>Cadastrar bobina</button>
+  </header>
+
+  <section id="v-dashboard" class="view">
+    <div class="cards" id="cards"></div>
+    <div class="quick">
+      <button class="btn" data-v="search">Pesquisar bobina</button>
+      <button class="btn" data-a="new">Cadastrar bobina</button>
+    </div>
+    <div class="grid2">
+      <div class="panel"><h2>Últimas atividades</h2><div id="d-act"></div></div>
+      <div class="panel"><h2>Cadastradas recentemente</h2><div id="d-rec"></div></div>
+    </div>
+  </section>
+
+  <section id="v-coils" class="view">
+    <div class="panel">
+      <input id="cf" class="big" type="search" placeholder="Filtrar por tipo, número ou endereço" autocomplete="off">
+      <div class="scroll"><table><thead><tr><th>Tipo</th><th>Número</th><th>Endereço</th><th>Atualizada em</th><th>Responsável</th><th>Ações</th></tr></thead><tbody id="coilBody"></tbody></table></div>
+    </div>
+  </section>
+
+  <section id="v-search" class="view">
+    <div class="panel">
+      <input id="q" class="big" type="search" placeholder="Digite número, parte do número, tipo ou endereço" autocomplete="off">
+      <p id="qmsg" class="hint">Aceita busca parcial e números parecidos (possíveis erros de digitação).</p>
+      <div class="scroll"><table><thead><tr><th>Correspondência</th><th>Tipo</th><th>Número</th><th>Endereço atual</th><th>Semelhança</th><th>Ações</th></tr></thead><tbody id="qBody"></tbody></table></div>
+    </div>
+  </section>
+
+  <section id="v-history" class="view">
+    <div class="panel">
+      <div class="filters">
+        <input id="hq" type="search" placeholder="Número ou endereço">
+        <input id="ht" type="search" placeholder="Tipo">
+        <label>De <input id="hd1" type="date"></label>
+        <label>Até <input id="hd2" type="date"></label>
+      </div>
+      <div class="scroll"><table><thead><tr><th>Data e hora</th><th>Número</th><th>Tipo</th><th>Operação</th><th>Endereço anterior</th><th>Novo endereço</th><th>Responsável</th></tr></thead><tbody id="hBody"></tbody></table></div>
+    </div>
+  </section>
+
+  <section id="v-io" class="view">
+    <div class="grid2">
+      <div class="panel">
+        <h2>CSV</h2>
+        <p class="hint">Colunas: Tipo; Número; Endereço; Responsável (separador ; ou ,). Número já existente é atualizado (tipo, endereço e responsável) somente se houver diferença; linhas iguais são ignoradas e linhas incompletas são rejeitadas. Você confirma antes de aplicar.</p>
+        <div class="row"><button class="btn" data-a="pick-csv">Importar CSV</button><button class="btn" data-a="exp-csv">Exportar CSV</button></div>
+        <input id="fcsv" type="file" accept=".csv,text/csv,text/plain" hidden>
+      </div>
+      <div class="panel">
+        <h2>Backup JSON</h2>
+        <p class="hint">Inclui bobinas e histórico completo. Restaurar substitui todos os dados atuais, após confirmação.</p>
+        <div class="row"><button class="btn" data-a="exp-json">Baixar backup</button><button class="btn" data-a="pick-json">Restaurar backup</button></div>
+        <input id="fjson" type="file" accept=".json,application/json" hidden>
+      </div>
+    </div>
+    <div class="panel" id="ioRes" hidden></div>
+  </section>
+
+  <section id="v-settings" class="view">
+    <div class="panel">
+      <h2>Armazenamento local</h2>
+      <p>Os dados ficam no <b>localStorage</b> deste navegador e deste dispositivo. Não são sincronizados entre usuários, computadores ou celulares. O GitHub Pages apenas hospeda os arquivos do site. Limpar os dados do navegador apaga os registros — faça backups com frequência.</p>
+      <p id="stInfo" class="hint"></p>
+      <p class="hint">O sistema só registra o que o usuário informa; não detecta movimentação física de bobinas.</p>
+      <label class="fld">Responsável padrão nas operações<input id="defop" maxlength="60" placeholder="Opcional"></label>
+      <div class="row"><button class="btn danger" data-a="clear">Apagar todos os dados</button></div>
+    </div>
+  </section>
+</main>
+
+<dialog id="dlg">
+  <form id="frm" novalidate>
+    <h2 id="dTitle"></h2>
+    <label class="fld">Tipo da bobina<input id="f-type" maxlength="20" placeholder="Ex.: R" autocomplete="off"></label>
+    <label class="fld">Número da bobina<input id="f-num" maxlength="40" placeholder="Ex.: P908070" autocomplete="off"></label>
+    <label class="fld">Endereço<input id="f-addr" maxlength="20" placeholder="Ex.: 342B" autocomplete="off"></label>
+    <label class="fld">Responsável (opcional)<input id="f-op" maxlength="60" autocomplete="off"></label>
+    <p class="hint">Espaços extras são removidos e letras ficam maiúsculas; o restante da identificação não é alterado.</p>
+    <p id="ferr" class="err" role="alert"></p>
+    <div class="row end"><button type="button" class="btn" id="cancel">Cancelar</button><button type="submit" class="btn pri" id="dOk">Salvar</button></div>
+  </form>
+</dialog>
+<div id="toasts" aria-live="polite"></div>
+<script src="script.js"></script>
+</body>
+</html>
